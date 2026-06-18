@@ -6,27 +6,8 @@ import time
 import threading
 import math
 from playsound import playsound
-from flask import Flask, render_template, jsonify
+from ultralytics import YOLO
 
-app = Flask(__name__)
-
-dashboard_data = {
-    "status": "NORMAL",
-    "score": 0,
-    "ear": 0.0,
-    "direction": "FORWARD"
-}
-
-@app.route("/")
-def home():
-    return render_template("index.html")
-
-@app.route("/data")
-def data():
-    return jsonify(dashboard_data)
-
-if __name__ == "__main__":
-    app.run(debug=True)
 
 EAR_THRESHOLD = 0.22  
 fatigue_score = 0
@@ -54,6 +35,10 @@ options = vision.FaceLandmarkerOptions(
 detector = vision.FaceLandmarker.create_from_options(options)
 print("Model loaded successfully!")
 
+print("Loading YOLO...")
+yolo_model = YOLO("yolov8n.pt")
+print("YOLO loaded!")
+
 cap = cv2.VideoCapture(0)
 
 def play_alarm():
@@ -80,6 +65,9 @@ def calculate_ear(landmarks, indices, img_w, img_h):
 
 # --- Main Loop ---
 print("Starting Camera... Press 'q' in the video window to quit.")
+phone_start_time = None
+direction = "FORWARD"
+phone_alarm_active = False
 while True:
     ret, frame = cap.read()
     if not ret:
@@ -95,6 +83,42 @@ while True:
     
     # Process the frame
     results = detector.detect(mp_image)
+    yolo_results = yolo_model(frame, verbose=False)
+
+    phone_detected = False
+    for result in yolo_results:
+
+        boxes = result.boxes
+
+        for box in boxes:
+
+            cls = int(box.cls[0])
+
+            name = yolo_model.names[cls]
+
+            if name == "cell phone":
+
+                phone_detected = True
+
+                x1, y1, x2, y2 = map(int, box.xyxy[0])
+
+                cv2.rectangle(
+                    frame,
+                    (x1, y1),
+                    (x2, y2),
+                    (0, 0, 255),
+                    2
+                )
+
+                cv2.putText(
+                    frame,
+                    "PHONE DETECTED",
+                    (x1, y1 - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.7,
+                    (0, 0, 255),
+                    2
+                )
 
     face_found = False
     eyes_open = True
@@ -103,6 +127,8 @@ while True:
     if results.face_landmarks:
         face_found = True
         landmarks = results.face_landmarks[0]
+
+        direction = "FORWARD"
 
         nose_x = landmarks[NOSE_TIP].x * img_w
         left_x = landmarks[LEFT_FACE].x * img_w
@@ -149,11 +175,38 @@ while True:
         if closed_duration >= 5:
             fatigue_score = min(100, fatigue_score + 2)
             
-    else:
-        eyes_closed_start = None
-        fatigue_score = min(100, fatigue_score + 0.5)
 
-   
+    if phone_detected:
+
+        if phone_start_time is None:
+            phone_start_time = time.time()
+
+        phone_duration = time.time() - phone_start_time
+
+        if phone_duration >= 3:
+
+            cv2.putText(
+                frame,
+                "PHONE DISTRACTION",
+                (20, 200),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.8,
+                (0, 0, 255),
+                2
+            )
+
+            if not phone_alarm_active:
+
+                    phone_alarm_active = True
+
+                    threading.Thread(
+                        target=play_alarm,
+                        daemon=True
+                    ).start()
+    else:
+        phone_start_time = None
+        phone_alarm_active = False
+
     if fatigue_score < 30:
         status = "NORMAL"
         color = (0, 255, 0)
@@ -187,6 +240,18 @@ while True:
        (0, 255, 255),
        2
     )
+
+    if phone_detected and phone_start_time is not None:
+
+        cv2.putText(
+            frame,
+            f"Phone: {phone_duration:.1f}s",
+            (20, 240),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.8,
+            (0, 255, 255),
+            2
+        )
 
     if not face_found:
         cv2.putText(frame, "NO FACE DETECTED", (20, 160), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
