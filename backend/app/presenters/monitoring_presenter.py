@@ -347,7 +347,7 @@ class MonitoringPresenter:
                 color = (0, 0, 255) # Red
 
             # Alarm Handling
-            if status == "CRITICAL":
+            if status == "CRITICAL" and face_found and not eyes_open:
                 self.trigger_alarm()
                 if not self.critical_alert_logged:
                     msg = "Eyes closed/Micro-sleep detected"
@@ -355,7 +355,7 @@ class MonitoringPresenter:
                     MongoDbLogger.log_event("Drowsiness", msg)
                     driver_state.increment_alert_count("Drowsiness")
                     self.critical_alert_logged = True
-            else:
+            elif status != "CRITICAL" or not face_found or eyes_open:
                 self.critical_alert_logged = False
 
             # Update shared driver state

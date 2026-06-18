@@ -462,7 +462,11 @@ export default function ManagerConsole({ stateData }) {
             }}>
               {safetyScore >= 80 ? '🟢 EXCELLENT' : safetyScore >= 60 ? '🟡 CAUTION' : '🚨 CRITICAL RISK'}
             </span>
-                {/* Main Row: Remote Live Feed & Logs (Left) + RAG Chat Assistant (Right) */}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Row: Remote Live Feed & Logs (Left) + RAG Chat Assistant (Right) */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.15fr', gap: '1.5rem' }}>
         
         {/* Left Side: Remote Live Feed + MongoDB Logs */}
@@ -851,3 +855,5 @@ export default function ManagerConsole({ stateData }) {
     </div>
   );
 }
+// Touch to force HMR recompile
+
