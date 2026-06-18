@@ -155,6 +155,36 @@ export default function ManagerConsole({ stateData }) {
     return 'log-event-badge yawning';
   };
 
+  // Calculate dynamic driver safety score based on MongoDB logs
+  const getSafetyScore = () => {
+    let score = 100;
+    let counts = { drowsiness: 0, distraction: 0, yawning: 0, camera: 0 };
+    
+    dbLogs.forEach(log => {
+      const ev = log.event.toLowerCase();
+      if (ev.includes('drowsiness') || ev.includes('sleep')) {
+        score -= 15;
+        counts.drowsiness += 1;
+      } else if (ev.includes('distraction') || ev.includes('look')) {
+        score -= 5;
+        counts.distraction += 1;
+      } else if (ev.includes('yawn')) {
+        score -= 3;
+        counts.yawning += 1;
+      } else if (ev.includes('camera') || ev.includes('offline') || ev.includes('absent') || ev.includes('disconnect')) {
+        score -= 10;
+        counts.camera += 1;
+      }
+    });
+    
+    return {
+      score: Math.max(0, score),
+      counts
+    };
+  };
+
+  const { score: safetyScore, counts: eventCounts } = getSafetyScore();
+
   // --- Auth screen UI ---
   if (!isLoggedIn) {
     return (
@@ -348,6 +378,32 @@ export default function ManagerConsole({ stateData }) {
           </button>
         </div>
 
+        {/* Dynamic Safety Score Card */}
+        <div className="glass-card" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+          <div style={{ 
+            background: safetyScore >= 80 ? 'rgba(16, 185, 129, 0.15)' : safetyScore >= 60 ? 'rgba(245, 158, 11, 0.15)' : 'rgba(244, 63, 94, 0.2)', 
+            color: safetyScore >= 80 ? 'var(--status-normal)' : safetyScore >= 60 ? 'var(--status-warning)' : 'var(--status-critical)', 
+            borderRadius: '12px', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <span style={{ fontSize: '1.5rem', fontWeight: 800 }}>🛡️</span>
+          </div>
+          <div style={{ flexGrow: 1 }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Session Safety Score</div>
+            <h3 style={{ fontSize: '1.6rem', fontWeight: 800, marginTop: '0.15rem', display: 'flex', alignItems: 'baseline', gap: '0.25rem' }}>
+              {safetyScore}
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>/100</span>
+            </h3>
+            <span style={{ 
+              fontSize: '0.7rem', 
+              color: safetyScore >= 80 ? 'var(--status-normal)' : safetyScore >= 60 ? 'var(--status-warning)' : 'var(--status-critical)', 
+              fontWeight: 700,
+              textTransform: 'uppercase'
+            }}>
+              {safetyScore >= 80 ? '🟢 EXCELLENT' : safetyScore >= 60 ? '🟡 CAUTION' : '🚨 CRITICAL RISK'}
+            </span>
+          </div>
+        </div>
+
       </div>
 
       {/* Main Row: RAG Assistant + MongoDB Logs */}
@@ -499,6 +555,37 @@ export default function ManagerConsole({ stateData }) {
               </button>
             </div>
           </div>
+
+          {/* Event counter bar */}
+          {dbLogs.length > 0 && (
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(4, 1fr)', 
+              gap: '0.5rem', 
+              padding: '0.6rem 1rem', 
+              background: 'rgba(255, 255, 255, 0.02)', 
+              borderBottom: '1px solid var(--glass-border)',
+              fontSize: '0.8rem',
+              textAlign: 'center'
+            }}>
+              <div>
+                <span style={{ color: 'var(--status-critical)', fontWeight: 800 }}>{eventCounts.drowsiness}</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}> Drowsy</span>
+              </div>
+              <div>
+                <span style={{ color: 'var(--status-warning)', fontWeight: 800 }}>{eventCounts.distraction}</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}> Distracted</span>
+              </div>
+              <div>
+                <span style={{ color: '#f59e0b', fontWeight: 800 }}>{eventCounts.yawning}</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}> Yawns</span>
+              </div>
+              <div>
+                <span style={{ color: 'var(--text-muted)', fontWeight: 800 }}>{eventCounts.camera}</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}> Offline</span>
+              </div>
+            </div>
+          )}
 
           <div className="table-container" style={{ flexGrow: 1, padding: '1rem', maxHeight: 'none', overflowY: 'auto' }}>
             {dbLogs.length === 0 ? (
