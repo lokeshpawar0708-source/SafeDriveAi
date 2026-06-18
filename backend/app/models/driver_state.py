@@ -25,6 +25,7 @@ class DriverState:
         self.yawn_threshold = 0.50
         self.distraction_threshold_seconds = 3.0
         self.yawn_cooldown_seconds = 5.0
+        self.enable_sound_alerts = True
         
         # Helper for yawn tracking
         self.last_yawn_time = 0.0
@@ -59,7 +60,7 @@ class DriverState:
             elif alert_type == "Distraction":
                 self.distraction_alerts_count += 1
 
-    def update_settings(self, ear_thresh, yawn_thresh, distraction_thresh):
+    def update_settings(self, ear_thresh, yawn_thresh, distraction_thresh, enable_sound=None):
         with self.lock:
             if ear_thresh is not None:
                 self.ear_threshold = float(ear_thresh)
@@ -67,6 +68,8 @@ class DriverState:
                 self.yawn_threshold = float(yawn_thresh)
             if distraction_thresh is not None:
                 self.distraction_threshold_seconds = float(distraction_thresh)
+            if enable_sound is not None:
+                self.enable_sound_alerts = bool(enable_sound)
 
     def calculate_risk_level(self):
         # Risk prediction engine rules:
@@ -98,7 +101,8 @@ class DriverState:
                 "settings": {
                     "ear_threshold": self.ear_threshold,
                     "yawn_threshold": self.yawn_threshold,
-                    "distraction_threshold_seconds": self.distraction_threshold_seconds
+                    "distraction_threshold_seconds": self.distraction_threshold_seconds,
+                    "enable_sound_alerts": self.enable_sound_alerts
                 }
             }
 

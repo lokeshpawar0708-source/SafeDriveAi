@@ -6,6 +6,7 @@ export default function SettingsPanel({ currentSettings, onSettingsUpdated }) {
   const [earThresh, setEarThresh] = useState(0.22);
   const [yawnThresh, setYawnThresh] = useState(0.50);
   const [distractThresh, setDistractThresh] = useState(3.0);
+  const [enableSound, setEnableSound] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -14,6 +15,7 @@ export default function SettingsPanel({ currentSettings, onSettingsUpdated }) {
       if (currentSettings.ear_threshold !== undefined) setEarThresh(currentSettings.ear_threshold);
       if (currentSettings.yawn_threshold !== undefined) setYawnThresh(currentSettings.yawn_threshold);
       if (currentSettings.distraction_threshold_seconds !== undefined) setDistractThresh(currentSettings.distraction_threshold_seconds);
+      if (currentSettings.enable_sound_alerts !== undefined) setEnableSound(currentSettings.enable_sound_alerts);
     }
   }, [currentSettings]);
 
@@ -23,7 +25,8 @@ export default function SettingsPanel({ currentSettings, onSettingsUpdated }) {
     const result = await updateSettings({
       ear_threshold: earThresh,
       yawn_threshold: yawnThresh,
-      distraction_threshold_seconds: distractThresh
+      distraction_threshold_seconds: distractThresh,
+      enable_sound_alerts: enableSound
     });
     setSaving(false);
 
@@ -126,6 +129,29 @@ export default function SettingsPanel({ currentSettings, onSettingsUpdated }) {
           </div>
           <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
             Duration (in seconds) the driver can look away (left, right, or down) before triggering a distraction warning. Standard is 3.0s.
+          </p>
+        </div>
+
+        {/* Toggle Sound Alerts */}
+        <div className="form-group" style={{ marginTop: '1.5rem', marginBottom: '2rem' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', userSelect: 'none' }}>
+            <input
+              type="checkbox"
+              checked={enableSound}
+              onChange={(e) => setEnableSound(e.target.checked)}
+              style={{
+                width: '18px',
+                height: '18px',
+                accentColor: 'var(--status-normal)',
+                cursor: 'pointer'
+              }}
+            />
+            <span style={{ fontSize: '0.9rem', color: '#ffffff', fontWeight: 500 }}>
+              Enable System Audio Alerts (Windows Buzzer Alarm)
+            </span>
+          </label>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
+            Uncheck this to mute the sound alert on the machine. Drowsiness events will still be logged normally to the database.
           </p>
         </div>
 

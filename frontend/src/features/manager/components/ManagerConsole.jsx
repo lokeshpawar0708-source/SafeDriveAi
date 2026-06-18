@@ -143,6 +143,34 @@ export default function ManagerConsole({ stateData }) {
     }
   };
 
+  const handleExportCsv = () => {
+    if (dbLogs.length === 0) return;
+    
+    // Define headers
+    const headers = ["Timestamp", "Driver ID", "Event Type", "Event Details"];
+    
+    // Construct CSV rows
+    const rows = dbLogs.map(log => [
+      `"${log.time}"`,
+      `"${log.driver_id}"`,
+      `"${log.event}"`,
+      `"${log.details.replace(/"/g, '""')}"`
+    ]);
+    
+    const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    
+    // Create Blob and trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `safedrive_fleet_session_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const suggestQuery = (query) => {
     handleSend(query);
   };
@@ -401,15 +429,165 @@ export default function ManagerConsole({ stateData }) {
             }}>
               {safetyScore >= 80 ? '🟢 EXCELLENT' : safetyScore >= 60 ? '🟡 CAUTION' : '🚨 CRITICAL RISK'}
             </span>
+                {/* Main Row: Remote Live Feed & Logs (Left) + RAG Chat Assistant (Right) */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.15fr', gap: '1.5rem' }}>
+        
+        {/* Left Side: Remote Live Feed + MongoDB Logs */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', height: '520px' }}>
+          
+          {/* Live Video Feed Card */}
+          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', height: '220px', overflow: 'hidden' }}>
+            <div style={{ padding: '0.6rem 1rem', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '1rem' }}>📹</span>
+                <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Remote Driver Live Feed</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700 }}>
+                <span style={{ width: '6px', height: '6px', backgroundColor: '#ef4444', borderRadius: '50%', display: 'inline-block', animation: 'pulse-dot 1.2s infinite' }} />
+                REMOTE LIVE
+              </div>
+            </div>
+            <div style={{ flexGrow: 1, position: 'relative', background: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
+              <img 
+                src="http://localhost:5000/api/stream" 
+                alt="Remote driver monitoring stream" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.parentNode.querySelector('.stream-offline-placeholder').style.display = 'flex';
+                }}
+              />
+              <div className="stream-offline-placeholder" style={{ display: 'none', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                <span>⚠️ Remote Camera Stream Offline</span>
+              </div>
+              
+              {/* Scanline overlay for scifi/futuristic effect */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%)',
+                backgroundSize: '100% 4px',
+                pointerEvents: 'none'
+              }} />
+            </div>
           </div>
+
+          {/* MongoDB Logs Table Card */}
+          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', height: '285px', overflow: 'hidden' }}>
+            
+            <div style={{ padding: '0.6rem 1rem', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Database size={16} style={{ color: 'var(--text-muted)' }} />
+                <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>MongoDB Fleet Logs ({dbLogs.length})</span>
+              </div>
+              
+              <div style={{ display: 'flex', gap: '0.4rem' }}>
+                <button 
+                  className="btn btn-secondary" 
+                  onClick={loadLogs} 
+                  disabled={refreshing}
+                  style={{ padding: '0.25rem 0.4rem', display: 'flex', alignItems: 'center' }}
+                  title="Refresh Database Logs"
+                >
+                  <RefreshCw size={12} className={refreshing ? 'spin-icon' : ''} style={{ animation: refreshing ? 'pulse-spin 1s infinite linear' : 'none' }} />
+                </button>
+                
+                <button 
+                  className="btn btn-secondary" 
+                  onClick={handleExportCsv} 
+                  disabled={dbLogs.length === 0}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                  title="Export Session Logs to CSV"
+                >
+                  📥 Export CSV
+                </button>
+                
+                <button 
+                  className="btn btn-danger" 
+                  onClick={handleClearDb} 
+                  disabled={dbLogs.length === 0}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                  title="Clear Historical Logs in MongoDB"
+                >
+                  <Trash2 size={12} /> Clear DB
+                </button>
+              </div>
+            </div>
+
+            {/* Event counter bar */}
+            {dbLogs.length > 0 && (
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(4, 1fr)', 
+                gap: '0.3rem', 
+                padding: '0.4rem 0.6rem', 
+                background: 'rgba(255, 255, 255, 0.02)', 
+                borderBottom: '1px solid var(--glass-border)',
+                fontSize: '0.75rem',
+                textAlign: 'center'
+              }}>
+                <div>
+                  <span style={{ color: 'var(--status-critical)', fontWeight: 800 }}>{eventCounts.drowsiness}</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}> Drowsy</span>
+                </div>
+                <div>
+                  <span style={{ color: 'var(--status-warning)', fontWeight: 800 }}>{eventCounts.distraction}</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}> Distracted</span>
+                </div>
+                <div>
+                  <span style={{ color: '#f59e0b', fontWeight: 800 }}>{eventCounts.yawning}</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}> Yawns</span>
+                </div>
+                <div>
+                  <span style={{ color: 'var(--text-muted)', fontWeight: 800 }}>{eventCounts.camera}</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}> Offline</span>
+                </div>
+              </div>
+            )}
+
+            <div className="table-container" style={{ flexGrow: 1, padding: '0.5rem', maxHeight: 'none', overflowY: 'auto' }}>
+              {dbLogs.length === 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '2.5rem 1rem', textAlign: 'center' }}>
+                  <ShieldCheck size={36} style={{ color: 'var(--status-normal)' }} />
+                  <div>
+                    <p style={{ fontWeight: 700, fontSize: '0.85rem' }}>No database logs found</p>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                      Webcam alerts will sync to MongoDB in real time.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <table className="logs-table" style={{ fontSize: '0.8rem' }}>
+                  <thead>
+                    <tr>
+                      <th>Time</th>
+                      <th>Event</th>
+                      <th>Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dbLogs.map((log, index) => (
+                      <tr key={index}>
+                        <td style={{ fontWeight: 600, color: '#ffffff' }}>{log.time}</td>
+                        <td>
+                          <span className={getBadgeClass(log.event)} style={{ padding: '0.1rem 0.3rem', fontSize: '0.7rem' }}>{log.event}</span>
+                        </td>
+                        <td style={{ color: 'var(--text-muted)' }}>{log.details}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+          </div>
+
         </div>
 
-      </div>
-
-      {/* Main Row: RAG Assistant + MongoDB Logs */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.12fr 1fr', gap: '1.5rem' }}>
-        
-        {/* Left Side: RAG Chat Assistant */}
+        {/* Right Side: RAG Chat Assistant */}
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', height: '520px', overflow: 'hidden' }}>
           
           {/* Header */}
@@ -489,7 +667,7 @@ export default function ManagerConsole({ stateData }) {
             <button className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }} onClick={() => suggestQuery("Was camera disconnected?")}>
               Camera status block/off?
             </button>
-            <button className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }} onClick={() => suggestQuery("Summarize driving logs")}>
+            <button className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }} onClick={() => suggestQuery("Summarize driving safety")}>
               Summarize driving safety
             </button>
           </div>
@@ -523,106 +701,6 @@ export default function ManagerConsole({ stateData }) {
               <Send size={15} /> Send
             </button>
           </form>
-
-        </div>
-
-        {/* Right Side: MongoDB Logs Table */}
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', height: '520px' }}>
-          
-          <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Database size={18} style={{ color: 'var(--text-muted)' }} />
-              <span style={{ fontWeight: 700 }}>MongoDB Cluster Logs ({dbLogs.length})</span>
-            </div>
-            
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button 
-                className="btn btn-secondary" 
-                onClick={loadLogs} 
-                disabled={refreshing}
-                style={{ padding: '0.4rem 0.6rem', display: 'flex', alignItems: 'center' }}
-              >
-                <RefreshCw size={14} className={refreshing ? 'spin-icon' : ''} style={{ animation: refreshing ? 'pulse-spin 1s infinite linear' : 'none' }} />
-              </button>
-              
-              <button 
-                className="btn btn-danger" 
-                onClick={handleClearDb} 
-                disabled={dbLogs.length === 0}
-                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.8rem' }}
-              >
-                <Trash2 size={14} /> Clear DB
-              </button>
-            </div>
-          </div>
-
-          {/* Event counter bar */}
-          {dbLogs.length > 0 && (
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(4, 1fr)', 
-              gap: '0.5rem', 
-              padding: '0.6rem 1rem', 
-              background: 'rgba(255, 255, 255, 0.02)', 
-              borderBottom: '1px solid var(--glass-border)',
-              fontSize: '0.8rem',
-              textAlign: 'center'
-            }}>
-              <div>
-                <span style={{ color: 'var(--status-critical)', fontWeight: 800 }}>{eventCounts.drowsiness}</span>
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}> Drowsy</span>
-              </div>
-              <div>
-                <span style={{ color: 'var(--status-warning)', fontWeight: 800 }}>{eventCounts.distraction}</span>
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}> Distracted</span>
-              </div>
-              <div>
-                <span style={{ color: '#f59e0b', fontWeight: 800 }}>{eventCounts.yawning}</span>
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}> Yawns</span>
-              </div>
-              <div>
-                <span style={{ color: 'var(--text-muted)', fontWeight: 800 }}>{eventCounts.camera}</span>
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}> Offline</span>
-              </div>
-            </div>
-          )}
-
-          <div className="table-container" style={{ flexGrow: 1, padding: '1rem', maxHeight: 'none', overflowY: 'auto' }}>
-            {dbLogs.length === 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', padding: '5rem 2rem', textAlign: 'center' }}>
-                <ShieldCheck size={48} style={{ color: 'var(--status-normal)' }} />
-                <div>
-                  <p style={{ fontWeight: 700 }}>No database logs found</p>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                    Webcam alerts will sync to MongoDB in real time.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <table className="logs-table">
-                <thead>
-                  <tr>
-                    <th>Time</th>
-                    <th>Driver</th>
-                    <th>Event</th>
-                    <th>Details</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dbLogs.map((log, index) => (
-                    <tr key={index}>
-                      <td style={{ fontWeight: 600, color: '#ffffff', fontSize: '0.85rem' }}>{log.time}</td>
-                      <td style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{log.driver_id}</td>
-                      <td>
-                        <span className={getBadgeClass(log.event)}>{log.event}</span>
-                      </td>
-                      <td style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{log.details}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
 
         </div>
 

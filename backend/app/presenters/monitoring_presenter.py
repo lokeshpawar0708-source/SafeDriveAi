@@ -85,7 +85,7 @@ class MonitoringPresenter:
                 self.alarm_playing = False
 
     def trigger_alarm(self):
-        if not self.alarm_playing:
+        if driver_state.enable_sound_alerts and not self.alarm_playing:
             threading.Thread(target=self.play_alarm_sound, daemon=True).start()
 
     def calculate_ear(self, landmarks, indices, img_w, img_h):

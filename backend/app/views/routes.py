@@ -86,8 +86,9 @@ def update_settings():
     ear_thresh = data.get('ear_threshold')
     yawn_thresh = data.get('yawn_threshold')
     distraction_thresh = data.get('distraction_threshold_seconds')
+    enable_sound = data.get('enable_sound_alerts')
     
-    driver_state.update_settings(ear_thresh, yawn_thresh, distraction_thresh)
+    driver_state.update_settings(ear_thresh, yawn_thresh, distraction_thresh, enable_sound)
     return jsonify({
         "message": "Settings updated successfully",
         "settings": driver_state.to_dict()["settings"]
