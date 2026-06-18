@@ -4,8 +4,10 @@ from datetime import datetime
 from pymongo import MongoClient
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+# Load environment variables explicitly from backend/.env
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ENV_PATH = os.path.join(BASE_DIR, ".env")
+load_dotenv(dotenv_path=ENV_PATH)
 
 MONGODB_URI = os.getenv("MONGODB_URI")
 DB_NAME = "safedrive_db"
@@ -86,6 +88,18 @@ class MongoDbLogger:
                 return logs
             except Exception as e:
                 print(f"Error reading logs from MongoDB: {e}")
+        
+        # Fallback to local CSV logs if MongoDB is not connected
+        try:
+            from app.models.alert_log import AlertLogger
+            local_logs = AlertLogger.get_logs()
+            # Ensure each log has 'driver_id' key to avoid KeyError in RAG presenter
+            for log in local_logs:
+                if "driver_id" not in log:
+                    log["driver_id"] = "Driver_01"
+            return local_logs
+        except Exception as e:
+            print(f"Fallback CSV read failed: {e}")
         return []
 
     @staticmethod
@@ -97,6 +111,13 @@ class MongoDbLogger:
                 return True
             except Exception as e:
                 print(f"Error clearing logs in MongoDB: {e}")
+        
+        # Fallback to local CSV logs clear if MongoDB is not connected
+        try:
+            from app.models.alert_log import AlertLogger
+            return AlertLogger.clear_logs()
+        except Exception as e:
+            print(f"Fallback CSV clear failed: {e}")
         return False
 
     # --- Manager User Authentication Logic ---
@@ -107,12 +128,18 @@ class MongoDbLogger:
     @staticmethod
     def create_manager(username, password):
         col = get_managers_collection()
-        if col is None:
-            return {"error": "Database not connected"}
-            
         username_clean = username.strip().lower()
         password_hash = MongoDbLogger.hash_password(password)
-        
+
+        if col is None:
+            # Local in-memory registration fallback
+            global mock_users
+            if username_clean in mock_users:
+                return {"error": "Username already exists"}
+            mock_users[username_clean] = password_hash
+            print(f"SUCCESS: Manager account '{username_clean}' registered locally in-memory.")
+            return {"success": True}
+            
         try:
             # Check if user already exists
             existing = col.find_one({"username": username_clean})
@@ -131,12 +158,14 @@ class MongoDbLogger:
     @staticmethod
     def authenticate_manager(username, password):
         col = get_managers_collection()
-        if col is None:
-            return False
-            
         username_clean = username.strip().lower()
         password_hash = MongoDbLogger.hash_password(password)
-        
+
+        if col is None:
+            # Local in-memory authentication fallback
+            global mock_users
+            return mock_users.get(username_clean) == password_hash
+            
         try:
             user = col.find_one({"username": username_clean})
             if user and user.get("password_hash") == password_hash:
@@ -145,3 +174,8 @@ class MongoDbLogger:
             print(f"Authentication error: {e}")
             
         return False
+
+# In-memory fallback dictionary initialized with default admin credentials
+mock_users = {
+    "admin": hashlib.sha256("admin".encode('utf-8')).hexdigest()
+}

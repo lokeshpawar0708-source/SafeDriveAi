@@ -1,1 +1,217 @@
 Time,Event,Details
+12:28:57,Distraction,Driver looking DOWN for 3.0s
+12:29:26,Distraction,Driver looking DOWN for 3.1s
+12:30:08,Distraction,Driver looking LEFT for 3.0s
+12:30:41,Distraction,Driver looking DOWN for 3.0s
+12:30:56,Camera Status,No face detected (camera blocked or driver absent)
+12:30:58,Camera Status,Face detected (camera feed / driver resumed)
+12:31:01,Distraction,Driver looking DOWN for 3.0s
+12:31:28,Distraction,Driver looking LEFT for 3.0s
+12:31:41,Distraction,Driver looking DOWN for 3.0s
+12:31:48,Distraction,Driver looking DOWN for 3.0s
+12:32:35,Distraction,Driver looking LEFT for 3.0s
+12:47:15,Distraction,Driver looking DOWN for 3.0s
+12:47:45,Distraction,Driver looking LEFT for 3.0s
+12:47:59,Distraction,Driver looking DOWN for 3.0s
+12:48:09,Distraction,Driver looking DOWN for 3.0s
+13:11:37,Distraction,Driver looking DOWN for 3.0s
+13:12:10,Distraction,Driver looking RIGHT for 3.1s
+13:12:27,Distraction,Driver looking DOWN for 3.0s
+13:12:32,Distraction,Driver looking DOWN for 3.0s
+13:13:03,Distraction,Driver looking DOWN for 3.1s
+13:13:13,Distraction,Driver looking DOWN for 3.0s
+13:13:22,Distraction,Driver looking DOWN for 5.0s
+13:13:35,Drowsiness,Eyes closed/Micro-sleep detected
+13:14:14,Drowsiness,Eyes closed/Micro-sleep detected
+13:15:42,Distraction,Driver looking DOWN for 3.1s
+13:16:08,Distraction,Driver looking DOWN for 3.1s
+13:16:52,Distraction,Driver looking DOWN for 3.0s
+13:17:18,Distraction,Driver looking DOWN for 3.0s
+13:17:41,Distraction,Driver looking DOWN for 3.1s
+13:17:50,Distraction,Driver looking DOWN for 3.4s
+13:17:53,Distraction,Driver looking DOWN for 3.1s
+13:18:00,Distraction,Driver looking LEFT for 3.0s
+13:18:20,Distraction,Driver looking DOWN for 3.1s
+13:18:29,Camera Status,No face detected (camera blocked or driver absent)
+13:18:30,Camera Status,Face detected (camera feed / driver resumed)
+13:18:34,Distraction,Driver looking DOWN for 3.1s
+13:18:48,Distraction,Driver looking DOWN for 3.1s
+13:19:14,Distraction,Driver looking LEFT for 3.1s
+13:20:08,Camera Status,No face detected (camera blocked or driver absent)
+13:20:10,Camera Status,Face detected (camera feed / driver resumed)
+13:23:38,Distraction,Driver looking RIGHT for 3.0s
+13:24:01,Distraction,Driver looking RIGHT for 3.0s
+13:24:12,Distraction,Driver looking DOWN for 3.0s
+13:24:20,Distraction,Driver looking DOWN for 3.0s
+13:24:58,Distraction,Driver looking DOWN for 3.1s
+13:27:55,Distraction,Driver looking DOWN for 3.0s
+13:28:28,Distraction,Driver looking DOWN for 3.0s
+13:28:51,Distraction,Driver looking DOWN for 3.0s
+13:29:36,Distraction,Driver looking DOWN for 3.0s
+13:30:49,Distraction,Driver looking DOWN for 3.4s
+13:31:08,Distraction,Driver looking DOWN for 3.2s
+13:31:12,Distraction,Driver looking DOWN for 3.0s
+13:31:50,Distraction,Driver looking LEFT for 3.1s
+13:31:52,Drowsiness,Eyes closed/Micro-sleep detected
+13:32:32,Distraction,Driver looking DOWN for 3.0s
+13:32:48,Distraction,Driver looking RIGHT for 3.0s
+13:33:11,Distraction,Driver looking RIGHT for 3.0s
+13:33:33,Distraction,Driver looking DOWN for 3.0s
+13:33:55,Distraction,Driver looking LEFT for 3.0s
+13:33:55,Drowsiness,Eyes closed/Micro-sleep detected
+13:33:55,Drowsiness,Eyes closed/Micro-sleep detected
+13:33:56,Drowsiness,Eyes closed/Micro-sleep detected
+13:33:56,Drowsiness,Eyes closed/Micro-sleep detected
+13:34:22,Distraction,Driver looking DOWN for 3.0s
+13:34:28,Camera Status,No face detected (camera blocked or driver absent)
+13:34:33,Camera Status,Face detected (camera feed / driver resumed)
+13:36:39,Camera Status,No face detected (camera blocked or driver absent)
+13:36:44,Camera Status,Face detected (camera feed / driver resumed)
+13:36:57,Distraction,Driver looking DOWN for 3.0s
+13:37:06,Distraction,Driver looking DOWN for 3.1s
+13:37:12,Distraction,Driver looking DOWN for 3.0s
+13:37:19,Distraction,Driver looking DOWN for 3.0s
+13:37:41,Distraction,Driver looking DOWN for 3.1s
+13:38:18,Distraction,Driver looking DOWN for 3.0s
+13:38:24,Distraction,Driver looking DOWN for 3.1s
+13:40:42,Distraction,Driver looking DOWN for 3.0s
+13:41:11,Camera Status,No face detected (camera blocked or driver absent)
+13:41:26,Camera Status,Face detected (camera feed / driver resumed)
+13:42:39,Distraction,Driver looking DOWN for 3.0s
+13:42:53,Distraction,Driver looking DOWN for 3.0s
+13:42:59,Distraction,Driver looking DOWN for 3.1s
+13:44:52,Distraction,Driver looking RIGHT for 3.0s
+13:47:02,Distraction,Driver looking RIGHT for 3.0s
+13:47:48,Distraction,Driver looking LEFT for 3.0s
+13:48:02,Camera Status,No face detected (camera blocked or driver absent)
+13:48:06,Camera Status,Face detected (camera feed / driver resumed)
+13:48:31,Distraction,Driver looking DOWN for 3.0s
+13:48:58,Camera Status,No face detected (camera blocked or driver absent)
+13:48:59,Camera Status,Face detected (camera feed / driver resumed)
+13:49:11,Camera Status,No face detected (camera blocked or driver absent)
+13:49:15,Camera Status,Face detected (camera feed / driver resumed)
+13:49:25,Camera Status,No face detected (camera blocked or driver absent)
+13:49:26,Camera Status,Face detected (camera feed / driver resumed)
+13:49:29,Distraction,Driver looking RIGHT for 3.0s
+13:49:43,Distraction,Driver looking RIGHT for 3.0s
+13:49:53,Distraction,Driver looking RIGHT for 3.0s
+13:50:48,Camera Status,No face detected (camera blocked or driver absent)
+13:50:51,Camera Status,Face detected (camera feed / driver resumed)
+13:51:24,Camera Status,No face detected (camera blocked or driver absent)
+13:52:24,Camera Status,Face detected (camera feed / driver resumed)
+13:52:25,Drowsiness,Eyes closed/Micro-sleep detected
+13:52:28,Drowsiness,Eyes closed/Micro-sleep detected
+13:52:29,Drowsiness,Eyes closed/Micro-sleep detected
+13:52:42,Distraction,Driver looking DOWN for 3.1s
+13:52:51,Distraction,Driver looking DOWN for 3.0s
+13:53:04,Camera Status,No face detected (camera blocked or driver absent)
+13:53:06,Camera Status,Face detected (camera feed / driver resumed)
+13:53:20,Distraction,Driver looking RIGHT for 3.0s
+13:53:33,Distraction,Driver looking DOWN for 3.0s
+13:53:40,Distraction,Driver looking LEFT for 3.0s
+13:53:57,Distraction,Driver looking DOWN for 3.0s
+13:54:23,Camera Status,No face detected (camera blocked or driver absent)
+13:54:24,Camera Status,Face detected (camera feed / driver resumed)
+13:54:34,Camera Status,No face detected (camera blocked or driver absent)
+13:54:37,Camera Status,Face detected (camera feed / driver resumed)
+13:54:43,Camera Status,No face detected (camera blocked or driver absent)
+13:54:44,Camera Status,Face detected (camera feed / driver resumed)
+13:54:52,Camera Status,No face detected (camera blocked or driver absent)
+13:54:55,Camera Status,Face detected (camera feed / driver resumed)
+13:55:12,Camera Status,No face detected (camera blocked or driver absent)
+13:55:27,Camera Status,Face detected (camera feed / driver resumed)
+13:55:27,Drowsiness,Eyes closed/Micro-sleep detected
+13:55:31,Drowsiness,Eyes closed/Micro-sleep detected
+13:56:06,Distraction,Driver looking DOWN for 3.0s
+13:56:18,Distraction,Driver looking DOWN for 3.0s
+13:56:45,Distraction,Driver looking RIGHT for 3.0s
+13:57:41,Camera Status,No face detected (camera blocked or driver absent)
+13:57:46,Camera Status,Face detected (camera feed / driver resumed)
+13:57:49,Distraction,Driver looking DOWN for 3.0s
+14:48:40,Camera Status,No face detected (camera blocked or driver absent)
+14:48:43,Camera Status,Face detected (camera feed / driver resumed)
+14:48:47,Distraction,Driver looking DOWN for 3.1s
+14:49:12,Distraction,Driver looking RIGHT for 3.1s
+14:49:20,Distraction,Driver looking RIGHT for 3.0s
+14:49:28,Distraction,Driver looking RIGHT for 3.1s
+14:49:58,Camera Status,No face detected (camera blocked or driver absent)
+14:50:41,Camera Status,Face detected (camera feed / driver resumed)
+14:50:55,Distraction,Driver looking DOWN for 3.1s
+14:51:09,Distraction,Driver looking DOWN for 3.0s
+14:51:19,Distraction,Driver looking DOWN for 3.0s
+14:51:27,Distraction,Driver looking RIGHT for 3.0s
+14:51:53,Distraction,Driver looking DOWN for 3.0s
+14:56:58,Distraction,Driver looking DOWN for 3.0s
+14:59:14,Distraction,Driver looking DOWN for 5.8s
+14:59:21,Distraction,Driver looking RIGHT for 3.1s
+15:00:15,Drowsiness,Eyes closed/Micro-sleep detected
+15:00:16,Drowsiness,Eyes closed/Micro-sleep detected
+15:00:28,Distraction,Driver looking LEFT for 3.0s
+15:00:39,Camera Status,No face detected (camera blocked or driver absent)
+15:00:57,Camera Status,Face detected (camera feed / driver resumed)
+15:01:04,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:33,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:34,Distraction,Driver looking DOWN for 3.0s
+15:01:35,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:36,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:37,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:37,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:38,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:38,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:40,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:42,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:43,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:44,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:44,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:48,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:50,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:51,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:53,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:57,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:57,Distraction,Driver looking DOWN for 3.0s
+15:01:58,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:58,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:59,Drowsiness,Eyes closed/Micro-sleep detected
+15:01:59,Drowsiness,Eyes closed/Micro-sleep detected
+15:02:09,Distraction,Driver looking DOWN for 3.4s
+15:03:33,Drowsiness,Eyes closed/Micro-sleep detected
+15:03:47,Distraction,Driver looking RIGHT for 3.0s
+15:04:32,Distraction,Driver looking DOWN for 3.0s
+15:05:14,Distraction,Driver looking LEFT for 3.0s
+15:05:18,Distraction,Driver looking LEFT for 3.0s
+15:05:25,Distraction,Driver looking LEFT for 3.0s
+15:06:15,Distraction,Driver looking RIGHT for 3.0s
+15:09:52,Camera Status,No face detected (camera blocked or driver absent)
+15:09:58,Camera Status,Face detected (camera feed / driver resumed)
+15:10:05,Distraction,Driver looking DOWN for 3.3s
+15:12:21,Distraction,Driver looking RIGHT for 3.0s
+15:12:53,Distraction,Driver looking RIGHT for 3.0s
+15:13:07,Distraction,Driver looking RIGHT for 3.0s
+15:13:35,Distraction,Driver looking RIGHT for 3.1s
+15:14:59,Distraction,Driver looking RIGHT for 3.6s
+15:15:49,Distraction,Driver looking RIGHT for 3.0s
+15:16:15,Distraction,Driver looking RIGHT for 8.5s
+15:16:53,Distraction,Driver looking DOWN for 3.0s
+15:17:13,Distraction,Driver looking RIGHT for 3.1s
+15:18:07,Distraction,Driver looking RIGHT for 3.0s
+15:18:37,Distraction,Driver looking DOWN for 6.2s
+15:18:53,Distraction,Driver looking RIGHT for 3.0s
+15:18:58,Distraction,Driver looking RIGHT for 3.0s
+15:19:13,Distraction,Driver looking RIGHT for 3.0s
+15:21:27,Distraction,Driver looking RIGHT for 8.6s
+15:21:37,Distraction,Driver looking RIGHT for 3.0s
+15:22:24,Distraction,Driver looking DOWN for 3.1s
+15:23:00,Distraction,Driver looking RIGHT for 4.5s
+15:24:59,Camera Status,No face detected (camera blocked or driver absent)
+15:24:59,Camera Status,Face detected (camera feed / driver resumed)
+15:25:10,Distraction,Driver looking DOWN for 3.0s
+15:25:30,Distraction,Driver looking DOWN for 3.0s
+15:25:50,Distraction,Driver looking RIGHT for 3.5s
+15:26:13,Distraction,Driver looking RIGHT for 3.2s
+15:26:21,Distraction,Driver looking RIGHT for 3.0s
+15:26:42,Distraction,Driver looking RIGHT for 3.0s
+15:26:51,Distraction,Driver looking RIGHT for 3.0s
+15:27:00,Distraction,Driver looking RIGHT for 3.0s
+15:27:31,Distraction,Driver looking RIGHT for 3.0s
+15:28:26,Distraction,Driver looking RIGHT for 3.1s
+15:28:36,Distraction,Driver looking RIGHT for 3.0s

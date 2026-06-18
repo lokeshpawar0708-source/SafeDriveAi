@@ -3,8 +3,10 @@ import time
 from typing import TypedDict, List, Dict, Any
 from dotenv import load_dotenv
 
-# Load env variables
-load_dotenv()
+# Load env variables explicitly from backend/.env
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ENV_PATH = os.path.join(BASE_DIR, ".env")
+load_dotenv(dotenv_path=ENV_PATH)
 
 # Define the State for LangGraph workflow
 class AgentState(TypedDict):
@@ -28,8 +30,6 @@ def get_embeddings():
 # Node 1: Retrieve using MultiQuery RAG
 def retrieve_logs_node(state: AgentState) -> Dict[str, Any]:
     from app.models.mongodb_logger import MongoDbLogger
-    from langchain_core.documents import Document
-    from langchain_core.vectorstores import InMemoryVectorStore
     
     query = state["query"]
     
@@ -41,50 +41,19 @@ def retrieve_logs_node(state: AgentState) -> Dict[str, Any]:
             "context": "No alerts logged in the database yet. The driver has been safe and camera connection is online."
         }
     
-    # 2. Convert to LangChain Documents
-    documents = []
-    for log in logs:
-        content = f"[{log['time']}] Driver: {log['driver_id']} | Event: {log['event']} | Details: {log['details']}"
-        documents.append(Document(page_content=content, metadata=log))
+    # Check if Groq API key is configured
+    api_key = os.getenv("GROQ_API_KEY", "")
+    use_groq = api_key and api_key != "your_groq_api_key_here" and len(api_key.strip()) > 10
+    
+    # Bypass local HuggingFace embeddings download (which can hang/fail on slow connections)
+    # and feed the logs directly into context for the LLM. Llama 3 has a huge context window,
+    # so this is faster, more robust, and 100% accurate.
+    if use_groq:
+        lines = [f"[{log['time']}] Driver: {log['driver_id']} | Event: {log['event']} | Details: {log['details']}" for log in logs]
+        context = "\n".join(lines)
+        return {"logs": logs, "context": context}
         
-    try:
-        # 3. Create temporary In-Memory Vector Store
-        embeddings = get_embeddings()
-        vectorstore = InMemoryVectorStore.from_documents(documents, embeddings)
-        
-        # 4. Check if Groq API key is configured
-        api_key = os.getenv("GROQ_API_KEY", "")
-        use_groq = api_key and api_key != "your_groq_api_key_here" and len(api_key.strip()) > 10
-        
-        if use_groq:
-            from langchain_groq import ChatGroq
-            from langchain.retrievers.multi_query import MultiQueryRetriever
-            
-            # Initialize ChatGroq LLM for multi-query generation
-            llm = ChatGroq(
-                groq_api_key=api_key,
-                model_name="llama-3.3-70b-versatile",
-                temperature=0.1
-            )
-            
-            # Create MultiQuery Retriever (generates multiple queries and takes union of results)
-            retriever = MultiQueryRetriever.from_llm(
-                retriever=vectorstore.as_retriever(search_kwargs={"k": 5}),
-                llm=llm
-            )
-            
-            print(f"Executing MultiQuery retrieval for: '{query}'")
-            retrieved_docs = retriever.invoke(query)
-            
-            # Combine retrieved contexts
-            lines = [doc.page_content for doc in retrieved_docs]
-            context = "\n".join(lines) if lines else "No matching incident records found in the retrieved context."
-            return {"logs": logs, "context": context}
-            
-    except Exception as e:
-        print(f"Vector search or MultiQuery setup failed: {e}. Falling back to keyword search.")
-        
-    # --- Local Keyword Matching Fallback (if no Groq Key or if loading fails) ---
+    # --- Local Keyword Matching Fallback (if no Groq Key) ---
     keywords = query.lower().split()
     matched_lines = []
     for log in logs:
@@ -93,7 +62,6 @@ def retrieve_logs_node(state: AgentState) -> Dict[str, Any]:
             matched_lines.append(f"[{log['time']}] Event: {log['event']} | Details: {log['details']}")
             
     if not matched_lines:
-        # Fall back to returning all logs if no keyword matched
         matched_lines = [f"[{log['time']}] Event: {log['event']} | Details: {log['details']}" for log in logs[:10]]
         
     context = "\n".join(matched_lines)
@@ -110,13 +78,14 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
     api_key = os.getenv("GROQ_API_KEY", "")
     use_groq = api_key and api_key != "your_groq_api_key_here" and len(api_key.strip()) > 10
     
+    groq_error = None
     if use_groq:
         try:
             from langchain_groq import ChatGroq
             
             llm = ChatGroq(
                 groq_api_key=api_key,
-                model_name="llama-3.3-70b-versatile",
+                model_name="llama-3.3-70b-versatile",  # Active and recommended 70B model on Groq
                 temperature=0.2
             )
             
@@ -139,6 +108,7 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
             return {"response": res.content}
         except Exception as e:
             print(f"Groq LLM generation failed ({e}). Falling back to local semantic parser.")
+            groq_error = str(e)
             
     # --- Local Semantic Fallback Parser (Robust & Fast) ---
     response_text = ""
@@ -210,8 +180,12 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
         summary_lines.append(f"- **Distraction Alerts**: {len(distracted_logs)} times")
         summary_lines.append(f"- **Yawning Counts**: {len(yawn_logs)} times")
         summary_lines.append(f"- **Camera Disconnects**: {len(camera_logs)} times")
-        summary_lines.append("\n*Note: Please configure a valid `GROQ_API_KEY` in the `.env` file to chat freely with the AI!*")
+        if not use_groq:
+            summary_lines.append("\n*Note: Please configure a valid `GROQ_API_KEY` in the `.env` file to chat freely with the AI!*")
         response_text = "\n".join(summary_lines)
+        
+    if groq_error:
+        response_text = f"*⚠️ Groq API Error: {groq_error} (using local safety assistant fallback)*\n\n" + response_text
         
     return {"response": response_text}
 

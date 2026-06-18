@@ -1,12 +1,15 @@
 from flask import Flask, request, make_response
 import os
 from dotenv import load_dotenv
+
+# Load environment configurations explicitly from backend/.env
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ENV_PATH = os.path.join(BASE_DIR, ".env")
+load_dotenv(dotenv_path=ENV_PATH)
+
 from app.views.routes import api_blueprint
 from app.presenters.monitoring_presenter import monitoring_presenter
 from app.models.alert_log import AlertLogger
-
-# Load environment configurations
-load_dotenv()
 
 def create_app():
     app = Flask(__name__)
