@@ -213,6 +213,39 @@ export default function ManagerConsole({ stateData }) {
 
   const { score: safetyScore, counts: eventCounts } = getSafetyScore();
 
+  const getGazeDistractions = () => {
+    let left = 0;
+    let right = 0;
+    let down = 0;
+    dbLogs.forEach(log => {
+      if (log.event.toLowerCase().includes('distraction')) {
+        const details = log.details.toLowerCase();
+        if (details.includes('left')) left++;
+        else if (details.includes('right')) right++;
+        else if (details.includes('down')) down++;
+      }
+    });
+    const total = left + right + down || 1;
+    return {
+      left,
+      right,
+      down,
+      pctLeft: (left / total) * 100,
+      pctRight: (right / total) * 100,
+      pctDown: (down / total) * 100
+    };
+  };
+
+  const gazeStats = getGazeDistractions();
+
+  // Simulated fleet leaderboard
+  const leaderboardData = [
+    { name: "Driver_03 (Truck-88)", score: 98, status: "Excellent" },
+    { name: "Driver_02 (Truck-12)", score: 92, status: "Excellent" },
+    { name: "Driver_01 (You / active)", score: safetyScore, status: safetyScore >= 80 ? "Excellent" : safetyScore >= 60 ? "Caution" : "Risk" },
+    { name: "Driver_04 (Truck-05)", score: 78, status: "Caution" },
+  ].sort((a, b) => b.score - a.score);
+
   // --- Auth screen UI ---
   if (!isLoggedIn) {
     return (
@@ -702,6 +735,115 @@ export default function ManagerConsole({ stateData }) {
             </button>
           </form>
 
+        </div>
+
+      </div>
+
+      {/* Bottom Row: Fleet Leaderboard & Gaze Analytics */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', marginTop: '1.5rem' }}>
+        
+        {/* Fleet Leaderboard */}
+        <div className="glass-card" style={{ padding: '1.25rem' }}>
+          <h3 style={{ fontSize: '1rem', fontWeight: 700, borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            🏆 Fleet Safety Leaderboard
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            {leaderboardData.map((d, index) => {
+              const isActive = d.name.includes("You");
+              return (
+                <div 
+                  key={index} 
+                  style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    padding: '0.5rem 0.75rem', 
+                    background: isActive ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255,255,255,0.02)',
+                    border: '1px solid',
+                    borderColor: isActive ? 'rgba(16, 185, 129, 0.3)' : 'var(--glass-border)',
+                    borderRadius: '8px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ 
+                      fontWeight: 800, 
+                      color: index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : 'var(--text-muted)' 
+                    }}>
+                      #{index + 1}
+                    </span>
+                    <span style={{ fontWeight: isActive ? 700 : 500, color: isActive ? '#ffffff' : 'var(--text-muted)' }}>
+                      {d.name}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span style={{ 
+                      fontSize: '0.75rem', 
+                      background: d.status === 'Excellent' ? 'rgba(16,185,129,0.15)' : d.status === 'Caution' ? 'rgba(245,158,11,0.15)' : 'rgba(244,63,94,0.15)',
+                      color: d.status === 'Excellent' ? 'var(--status-normal)' : d.status === 'Caution' ? 'var(--status-warning)' : 'var(--status-critical)',
+                      padding: '0.15rem 0.4rem',
+                      borderRadius: '4px',
+                      fontWeight: 700
+                    }}>
+                      {d.status}
+                    </span>
+                    <span style={{ fontWeight: 800, color: '#ffffff' }}>{d.score} pts</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Driver Gaze Analytics */}
+        <div className="glass-card" style={{ padding: '1.25rem' }}>
+          <h3 style={{ fontSize: '1rem', fontWeight: 700, borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            📊 Distraction Gaze Analytics
+          </h3>
+          
+          {dbLogs.filter(l => l.event.toLowerCase().includes('distraction')).length === 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+              <span style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>👁️</span>
+              <p style={{ fontSize: '0.85rem' }}>No distraction events logged yet.</p>
+              <p style={{ fontSize: '0.75rem', marginTop: '0.15rem' }}>Driver gaze patterns will appear here once distraction is detected.</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+              
+              {/* Left gaze bar */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.25rem' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Looking Left (Side Mirror / Phone)</span>
+                  <span style={{ fontWeight: 700, color: '#ffffff' }}>{gazeStats.left} times ({Math.round(gazeStats.pctLeft)}%)</span>
+                </div>
+                <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ width: `${gazeStats.pctLeft}%`, height: '100%', background: 'var(--status-warning)', borderRadius: '4px', transition: 'width 0.5s ease' }} />
+                </div>
+              </div>
+
+              {/* Right gaze bar */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.25rem' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Looking Right (Passenger Side)</span>
+                  <span style={{ fontWeight: 700, color: '#ffffff' }}>{gazeStats.right} times ({Math.round(gazeStats.pctRight)}%)</span>
+                </div>
+                <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ width: `${gazeStats.pctRight}%`, height: '100%', background: '#f59e0b', borderRadius: '4px', transition: 'width 0.5s ease' }} />
+                </div>
+              </div>
+
+              {/* Down gaze bar */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.25rem' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Looking Down (Gear / Mobile / Lap)</span>
+                  <span style={{ fontWeight: 700, color: '#ffffff' }}>{gazeStats.down} times ({Math.round(gazeStats.pctDown)}%)</span>
+                </div>
+                <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ width: `${gazeStats.pctDown}%`, height: '100%', background: 'var(--status-critical)', borderRadius: '4px', transition: 'width 0.5s ease' }} />
+                </div>
+              </div>
+
+            </div>
+          )}
         </div>
 
       </div>
