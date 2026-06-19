@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Camera, CameraOff, RefreshCw } from 'lucide-react';
 
 export default function CameraFeed({ isBackendOnline }) {
-  const [streamUrl, setStreamUrl] = useState('http://localhost:5000/api/stream');
+  const [streamUrl, setStreamUrl] = useState(`http://${window.location.hostname}:5000/api/stream`);
   const [connectionError, setConnectionError] = useState(false);
   const [key, setKey] = useState(0); // Key helper to force re-render/re-fetch img stream
 

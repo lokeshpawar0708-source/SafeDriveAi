@@ -486,7 +486,7 @@ export default function ManagerConsole({ stateData }) {
             </div>
             <div style={{ flexGrow: 1, position: 'relative', background: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
               <img 
-                src="http://localhost:5000/api/stream" 
+                src={`http://${window.location.hostname}:5000/api/stream`} 
                 alt="Remote driver monitoring stream" 
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 onError={(e) => {

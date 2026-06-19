@@ -13,8 +13,10 @@ from app.models.mongodb_logger import MongoDbLogger
 
 # Paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT_DIR = os.path.dirname(BASE_DIR)
 MODEL_PATH = os.path.join(BASE_DIR, "face_landmarker.task")
 ALARM_PATH = os.path.join(BASE_DIR, "alarm.wav")
+YOLO_MODEL_PATH = os.path.join(ROOT_DIR, "yolov8n.pt")
 
 class MonitoringPresenter:
     def __init__(self):
@@ -29,6 +31,12 @@ class MonitoringPresenter:
         # State variables for distraction tracking
         self.distraction_start_time = None
         self.distraction_alert_logged = False
+        
+        # State variables for phone detection
+        self.yolo_model = None
+        self.phone_start_time = None
+        self.phone_alert_logged = False
+        self.phone_alarm_active = False
         
         # State variables for yawning detection
         self.yawn_start_time = None
@@ -148,10 +156,22 @@ class MonitoringPresenter:
             )
             self.detector = vision.FaceLandmarker.create_from_options(options)
             print("MediaPipe Face Landmarker loaded successfully.")
-            return True
         except Exception as e:
             print(f"Error loading MediaPipe detector: {e}")
             return False
+
+        print(f"Loading YOLO model from {YOLO_MODEL_PATH}...")
+        try:
+            from ultralytics import YOLO
+            self.yolo_model = YOLO(YOLO_MODEL_PATH)
+            print("YOLO model loaded successfully.")
+        except Exception as e:
+            print(f"Error loading YOLO model: {e}")
+            # We don't fail starting the whole thread just because YOLO fails, 
+            # but we print a clear error message.
+            self.yolo_model = None
+
+        return True
 
     def _run_loop(self):
         if not self._initialize_detector():
@@ -176,6 +196,34 @@ class MonitoringPresenter:
                 continue
 
             img_h, img_w, _ = frame.shape
+
+            # --- YOLO Phone Detection ---
+            phone_detected = False
+            if self.yolo_model is not None:
+                try:
+                    yolo_results = self.yolo_model(frame, verbose=False)
+                    for result in yolo_results:
+                        boxes = result.boxes
+                        for box in boxes:
+                            cls = int(box.cls[0])
+                            name = self.yolo_model.names[cls]
+                            if name == "cell phone":
+                                phone_detected = True
+                                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                                # Draw box and text
+                                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                                cv2.putText(
+                                    frame,
+                                    "PHONE DETECTED",
+                                    (x1, y1 - 10),
+                                    cv2.FONT_HERSHEY_SIMPLEX,
+                                    0.7,
+                                    (0, 0, 255),
+                                    2
+                                )
+                except Exception as e:
+                    print(f"Error during YOLO inference: {e}")
+
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
             results = self.detector.detect(mp_image)
@@ -271,19 +319,19 @@ class MonitoringPresenter:
                     MongoDbLogger.log_event("Camera Status", msg)
                     self.camera_offline_logged = False
 
-            # --- Distraction Logging & Detection ---
-            is_distracted = False
-            distraction_duration = 0.0
+            # --- Distraction Logging & Detection (Gaze & Phone) ---
+            is_gaze_distracted = False
+            gaze_distraction_duration = 0.0
 
             if face_found and direction != "FORWARD":
                 if self.distraction_start_time is None:
                     self.distraction_start_time = time.time()
-                distraction_duration = time.time() - self.distraction_start_time
+                gaze_distraction_duration = time.time() - self.distraction_start_time
                 
-                if distraction_duration >= driver_state.distraction_threshold_seconds:
-                    is_distracted = True
+                if gaze_distraction_duration >= driver_state.distraction_threshold_seconds:
+                    is_gaze_distracted = True
                     if not self.distraction_alert_logged:
-                        msg = f"Driver looking {direction} for {distraction_duration:.1f}s"
+                        msg = f"Driver looking {direction} for {gaze_distraction_duration:.1f}s"
                         AlertLogger.log_alert("Distraction", msg)
                         MongoDbLogger.log_event("Distraction", msg)
                         driver_state.increment_alert_count("Distraction")
@@ -308,6 +356,39 @@ class MonitoringPresenter:
             else:
                 self.yawn_start_time = None
                 self.yawn_in_progress = False
+
+            # --- Phone Distraction Logic ---
+            phone_duration = 0.0
+            if phone_detected:
+                if self.phone_start_time is None:
+                    self.phone_start_time = time.time()
+                phone_duration = time.time() - self.phone_start_time
+                
+                if phone_duration >= driver_state.distraction_threshold_seconds:
+                    cv2.putText(
+                        frame,
+                        "PHONE DISTRACTION",
+                        (20, 240),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.8,
+                        (0, 0, 255),
+                        2
+                    )
+                    
+                    if not self.phone_alert_logged:
+                        msg = f"Phone detected in hand for {phone_duration:.1f}s"
+                        AlertLogger.log_alert("Phone Distraction", msg)
+                        MongoDbLogger.log_event("Phone Distraction", msg)
+                        driver_state.increment_alert_count("Distraction")
+                        self.phone_alert_logged = True
+                        
+                    self.trigger_alarm()
+            else:
+                self.phone_start_time = None
+                self.phone_alert_logged = False
+
+            is_distracted = is_gaze_distracted or (phone_duration >= driver_state.distraction_threshold_seconds)
+            distraction_duration = max(gaze_distraction_duration, phone_duration)
 
             # --- Drowsiness/Fatigue Score Logic ---
             fatigue_score = driver_state.score
@@ -380,6 +461,17 @@ class MonitoringPresenter:
             elif not eyes_open and self.eyes_closed_start is not None:
                 closed_dur = time.time() - self.eyes_closed_start
                 cv2.putText(frame, f"Eyes Closed: {closed_dur:.1f}s", (20, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+
+            if phone_detected and self.phone_start_time is not None:
+                cv2.putText(
+                    frame,
+                    f"Phone: {phone_duration:.1f}s",
+                    (20, 240),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.8,
+                    (0, 255, 255),
+                    2
+                )
 
             if not face_found:
                 cv2.putText(frame, "NO FACE DETECTED", (20, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
