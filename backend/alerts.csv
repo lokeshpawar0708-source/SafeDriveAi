@@ -429,3 +429,13 @@ Time,Event,Details
 14:50:04,Camera Status,No face detected (camera blocked or driver absent)
 15:08:29,Camera Status,No face detected (camera blocked or driver absent)
 15:22:44,Camera Status,No face detected (camera blocked or driver absent)
+12:23:19,Distraction,Driver looking DOWN for 3.2s
+12:23:54,Distraction,Driver looking LEFT for 5.1s
+12:26:03,Drowsiness,Eyes closed/Micro-sleep detected
+12:28:32,Camera Status,No face detected (camera blocked or driver absent)
+12:35:04,Camera Status,Face detected (camera feed / driver resumed)
+12:35:12,Camera Status,No face detected (camera blocked or driver absent)
+12:35:30,Camera Status,Face detected (camera feed / driver resumed)
+12:35:36,Camera Status,No face detected (camera blocked or driver absent)
+12:36:16,Camera Status,Face detected (camera feed / driver resumed)
+
