@@ -1,0 +1,13 @@
+feat: Add Nearby Rest Stops and Hotels search feature
+
+- Add backend places model (places.py) with mock Lonavala expressway dataset
+- Integrate live OpenStreetMap Overpass API fallback for real-time hotel/guesthouse
+  search when outside Lonavala corridor (auto-triggered when coords > 40km away)
+- Add /api/places/search endpoint with Haversine distance, type/radius/query filters
+- Add RestStopsPanel.jsx with interactive Leaflet map, Google Maps tiles (Roads/Satellite/Hybrid), SVG fallback map
+- Integrate fatigue-triggered rest stop recommendations on live dashboard
+- Add big city location presets: Mumbai, Pune, Jalgaon, Delhi, Bangalore
+- Extend dropdown with highway presets: Khandala, Khalapur, Urse, Sajgaon
+- Add searchPlaces API caller in frontend services
+- Add Nearby Rest Stops nav tab in App.jsx
+- Apply glassmorphism card styling and Leaflet dark-theme overrides in index.css
