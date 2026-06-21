@@ -708,3 +708,73 @@ body {
 .dot-pulse span {
   animation: pulse-dot-loader 1.2s infinite ease-in-out;
 }
+
+/* --- Nearby Rest & Stay styles --- */
+.rest-stop-card {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rest-stop-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--glass-border-glow);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.highlighted-stop {
+  border-color: #ffffff !important;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.pulse-border {
+  border: 1px solid var(--status-warning);
+  animation: pulse-border-orange 1.5s infinite alternate;
+}
+
+@keyframes pulse-border-orange {
+  from {
+    border-color: rgba(245, 158, 11, 0.3);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.1);
+  }
+  to {
+    border-color: rgba(245, 158, 11, 0.6);
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+  }
+}
+
+.recommendation-card {
+  transition: all 0.3s ease;
+}
+
+/* Leaflet Dark Theme Overrides */
+.leaflet-popup-content-wrapper {
+  background: #0b1329 !important;
+  color: #f3f4f6 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5) !important;
+}
+
+.leaflet-popup-tip {
+  background: #0b1329 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: #9ca3af !important;
+  font-size: 1rem !important;
+  padding: 8px 10px 0 0 !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: #ffffff !important;
+}
+
+/* Custom styles for SVG map road overlay */
+.svg-fallback-map-wrapper {
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #070b19;
+}
+

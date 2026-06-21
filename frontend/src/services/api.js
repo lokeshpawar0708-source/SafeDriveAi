@@ -153,3 +153,24 @@ export const loginManager = async (username, password) => {
     return { error: error.message };
   }
 };
+
+export const searchPlaces = async (params = {}) => {
+  try {
+    const queryParams = new URLSearchParams();
+    if (params.lat !== undefined && params.lat !== null) queryParams.append('lat', params.lat);
+    if (params.lng !== undefined && params.lng !== null) queryParams.append('lng', params.lng);
+    if (params.query) queryParams.append('query', params.query);
+    if (params.radius) queryParams.append('radius', params.radius);
+    if (params.type) queryParams.append('type', params.type);
+
+    const response = await fetch(`${API_BASE_URL}/places/search?${queryParams.toString()}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error searching places:", error);
+    return [];
+  }
+};
+

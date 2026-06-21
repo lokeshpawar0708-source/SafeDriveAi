@@ -4,6 +4,7 @@ from app.models.alert_log import AlertLogger
 from app.models.mongodb_logger import MongoDbLogger
 from app.presenters.monitoring_presenter import monitoring_presenter
 from app.presenters.rag_presenter import RagPresenter
+from app.models.places import search_places
 import time
 
 api_blueprint = Blueprint('api', __name__)
@@ -106,3 +107,28 @@ def generate_frames():
 @api_blueprint.route('/stream', methods=['GET'])
 def video_stream():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@api_blueprint.route('/places/search', methods=['GET'])
+def search_nearby_places():
+    lat = request.args.get('lat')
+    lng = request.args.get('lng')
+    query = request.args.get('query')
+    radius = request.args.get('radius', 10.0)
+    place_type = request.args.get('type', 'all')
+    
+    try:
+        radius = float(radius)
+    except ValueError:
+        radius = 10.0
+        
+    try:
+        if lat is not None:
+            lat = float(lat)
+        if lng is not None:
+            lng = float(lng)
+    except ValueError:
+        lat = None
+        lng = None
+        
+    results = search_places(lat=lat, lng=lng, query=query, radius_km=radius, place_type=place_type)
+    return jsonify(results)

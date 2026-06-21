@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Activity, BarChart3, Settings, ShieldAlert, Cpu, Heart, CheckCircle2, AlertTriangle, Users } from 'lucide-react';
+import { Activity, BarChart3, Settings, ShieldAlert, Cpu, Heart, CheckCircle2, AlertTriangle, Users, MapPin } from 'lucide-react';
 import { getStatus, getLogs } from './services/api';
 import Dashboard from './features/dashboard/components/Dashboard';
 import AnalyticsPanel from './features/analytics/components/AnalyticsPanel';
 import SettingsPanel from './features/settings/components/SettingsPanel';
 import ManagerConsole from './features/manager/components/ManagerConsole';
+import RestStopsPanel from './features/places/components/RestStopsPanel';
 
 const DEFAULT_STATE = {
   face_found: false,
@@ -119,6 +120,12 @@ export default function App() {
             <BarChart3 size={16} /> Safety Analytics
           </button>
           <button 
+            className={`tab-btn ${activeTab === 'places' ? 'active' : ''}`}
+            onClick={() => setActiveTab('places')}
+          >
+            <MapPin size={16} /> Nearby Rest Stops
+          </button>
+          <button 
             className={`tab-btn ${activeTab === 'manager' ? 'active' : ''}`}
             onClick={() => setActiveTab('manager')}
           >
@@ -153,7 +160,14 @@ export default function App() {
           <Dashboard 
             stateData={stateData} 
             isBackendOnline={isBackendOnline} 
+            onNavigateToStops={() => setActiveTab('places')}
           />
+        )}
+        
+        {activeTab === 'places' && (
+          <div style={{ padding: '0 2rem', maxWidth: '1600px', margin: '0 auto' }}>
+            <RestStopsPanel stateData={stateData} />
+          </div>
         )}
         
         {activeTab === 'analytics' && (
