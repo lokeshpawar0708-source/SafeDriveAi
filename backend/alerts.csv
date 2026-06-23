@@ -439,3 +439,22 @@ Time,Event,Details
 12:35:36,Camera Status,No face detected (camera blocked or driver absent)
 12:36:16,Camera Status,Face detected (camera feed / driver resumed)
 
+16:51:13,Camera Status,No face detected (camera blocked or driver absent)
+16:51:26,Camera Status,Face detected (camera feed / driver resumed)
+16:54:05,Distraction,Driver looking DOWN for 4.4s
+16:55:09,Distraction,Driver looking DOWN for 44.3s
+16:55:45,Distraction,Driver looking DOWN for 6.2s
+16:58:34,Camera Status,No face detected (camera blocked or driver absent)
+16:59:37,Camera Status,Face detected (camera feed / driver resumed)
+16:59:57,Distraction,Driver looking DOWN for 19.1s
+17:00:12,Camera Status,No face detected (camera blocked or driver absent)
+17:00:30,Camera Status,Face detected (camera feed / driver resumed)
+17:01:03,Camera Status,No face detected (camera blocked or driver absent)
+17:07:43,Camera Status,Face detected (camera feed / driver resumed)
+17:07:55,Distraction,Driver looking DOWN for 10.9s
+17:09:27,Distraction,Driver looking DOWN for 3.6s
+17:09:40,Distraction,Driver looking DOWN for 7.6s
+17:10:18,Camera Status,No face detected (camera blocked or driver absent)
+17:10:38,Camera Status,Face detected (camera feed / driver resumed)
+17:10:44,Distraction,Driver looking LEFT for 5.6s
+17:12:47,Camera Status,No face detected (camera blocked or driver absent)
