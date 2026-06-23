@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Activity, BarChart3, Settings, ShieldAlert, Cpu, Heart, CheckCircle2, AlertTriangle, Users, MapPin } from 'lucide-react';
+import { Activity, BarChart3, Settings, ShieldAlert, Cpu, Heart, CheckCircle2, AlertTriangle, Users, MapPin, Phone, X, AlertOctagon } from 'lucide-react';
 import { getStatus, getLogs } from './services/api';
 import Dashboard from './features/dashboard/components/Dashboard';
 import AnalyticsPanel from './features/analytics/components/AnalyticsPanel';
@@ -27,12 +27,20 @@ const DEFAULT_STATE = {
   }
 };
 
+const SOS_SERVICES = [
+  { id: 'police',    label: 'Police',       number: '100', emoji: '🚔', color: '#3b82f6' },
+  { id: 'ambulance', label: 'Ambulance',     number: '108', emoji: '🚑', color: '#10b981' },
+  { id: 'fire',      label: 'Fire Brigade', number: '101', emoji: '🚒', color: '#f97316' },
+];
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('monitor');
   const [stateData, setStateData] = useState(DEFAULT_STATE);
   const [logs, setLogs] = useState([]);
   const [isBackendOnline, setIsBackendOnline] = useState(false);
   const [connRetries, setConnRetries] = useState(0);
+  const [sosExpanded, setSosExpanded] = useState(false);
+  const [sosConfirm, setSosConfirm] = useState(null);
 
   // References for intervals to clear on unmount
   const statusInterval = useRef(null);
@@ -91,6 +99,18 @@ export default function App() {
   const handleLogsCleared = () => {
     setLogs([]);
     fetchLogs();
+  };
+
+  const handleSosCall = (service) => {
+    setSosConfirm(service);
+    setSosExpanded(false);
+  };
+
+  const confirmSosCall = () => {
+    if (sosConfirm) {
+      window.location.href = `tel:${sosConfirm.number}`;
+      setSosConfirm(null);
+    }
   };
 
   return (
@@ -198,8 +218,59 @@ export default function App() {
 
       {/* Futuristic footer credit */}
       <footer style={{ marginTop: '4rem', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-        <p>SafeDrive AI Driver Monitoring System • Edge CV & Mediapipe Engine v1.0.0</p>
+        <p>SafeDrive AI Driver Monitoring System • Edge CV &amp; Mediapipe Engine v1.0.0</p>
       </footer>
+
+      {/* ===== EMERGENCY SOS FLOATING BUTTON ===== */}
+      <div className="sos-wrapper">
+        {SOS_SERVICES.map((svc, i) => (
+          <div
+            key={svc.id}
+            className={`sos-sub-btn ${sosExpanded ? 'sos-sub-visible' : ''}`}
+            style={{
+              transitionDelay: sosExpanded ? `${i * 60}ms` : `${(SOS_SERVICES.length - 1 - i) * 40}ms`,
+              '--svc-color': svc.color,
+            }}
+            onClick={() => handleSosCall(svc)}
+            title={`Call ${svc.label} (${svc.number})`}
+          >
+            <span className="sos-sub-emoji">{svc.emoji}</span>
+            <span className="sos-sub-label">{svc.label}</span>
+          </div>
+        ))}
+
+        <button
+          className={`sos-main-btn ${sosExpanded ? 'sos-main-open' : ''}`}
+          onClick={() => setSosExpanded(prev => !prev)}
+          aria-label="Emergency SOS"
+        >
+          {sosExpanded ? <X size={22} strokeWidth={3} /> : <AlertOctagon size={22} strokeWidth={3} />}
+        </button>
+        <span className="sos-label-text">Emergency SOS</span>
+      </div>
+
+      {sosConfirm && (
+        <div className="sos-modal-overlay" onClick={() => setSosConfirm(null)}>
+          <div className="sos-modal" onClick={e => e.stopPropagation()}>
+            <div className="sos-modal-icon">{sosConfirm.emoji}</div>
+            <h2 className="sos-modal-title">Call {sosConfirm.label}?</h2>
+            <p className="sos-modal-subtitle">
+              You are about to call <strong style={{ color: sosConfirm.color }}>{sosConfirm.label} ({sosConfirm.number})</strong>.<br />
+              Only proceed in a genuine emergency.
+            </p>
+            <div className="sos-modal-actions">
+              <button className="sos-modal-cancel" onClick={() => setSosConfirm(null)}>Cancel</button>
+              <button
+                className="sos-modal-confirm"
+                style={{ background: sosConfirm.color }}
+                onClick={confirmSosCall}
+              >
+                <Phone size={16} /> Call {sosConfirm.number}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
